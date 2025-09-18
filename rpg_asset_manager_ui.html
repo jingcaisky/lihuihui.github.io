@@ -3897,120 +3897,150 @@ https://motrix.app/ 下载并安装
             return results;
         }
 
+        // VRoid Hub OAuth配置
+        const VRoidConfig = {
+            clientId: 'your_client_id_here', // 需要从VRoid Hub开发者控制台获取
+            clientSecret: 'your_client_secret_here', // 需要从VRoid Hub开发者控制台获取
+            redirectUri: 'http://localhost:3000/oauth/callback', // 需要配置的回调URL
+            apiVersion: '11'
+        };
+
+        // VRoid Hub OAuth认证流程
+        async function authenticateVRoidHub() {
+            try {
+                // 检查是否已有有效的访问令牌
+                const storedToken = localStorage.getItem('vroid_access_token');
+                const tokenExpiry = localStorage.getItem('vroid_token_expiry');
+                
+                if (storedToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
+                    return storedToken;
+                }
+                
+                // 如果没有有效令牌，需要用户授权
+                console.log('需要VRoid Hub OAuth认证');
+                return null;
+                
+            } catch (error) {
+                console.error('VRoid Hub认证失败:', error);
+                return null;
+            }
+        }
+
         // 搜索VRoid Hub
         async function searchVRoidHub(keyword, filters) {
             const results = [];
             
             try {
-                console.log('VRoid Hub搜索（尝试API调用）...');
+                console.log('VRoid Hub搜索（使用正确的API端点）...');
                 
-                // 尝试调用VRoid Hub的公开API
-                // 注意：VRoid Hub通常需要OAuth认证，这里先尝试公开端点
-                const searchUrl = `https://hub.vroid.com/api/characters?q=${encodeURIComponent(keyword)}&limit=20`;
+                // 首先尝试认证
+                const accessToken = await authenticateVRoidHub();
+                
+                if (!accessToken) {
+                    console.log('VRoid Hub需要OAuth认证，使用模拟数据');
+                    // 返回模拟数据，因为需要OAuth认证
+                    return generateVRoidMockData(keyword);
+                }
+                
+                // 使用正确的VRoid Hub API端点
+                const searchUrl = `https://hub.vroid.com/api/search/character_models?keyword=${encodeURIComponent(keyword)}&count=5&is_downloadable=true`;
                 
                 console.log('VRoid Hub搜索URL:', searchUrl);
                 
-                try {
-                    const response = await fetch(searchUrl, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'User-Agent': 'RPG-Asset-Manager/2.0'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('VRoid Hub API响应:', data);
-                        
-                        if (data.characters && data.characters.length > 0) {
-                            data.characters.forEach((item, index) => {
-                                const resource = {
-                                    id: `vroid_${item.id}`,
-                                    title: item.name || `VRoid角色${index + 1}`,
-                                    size: '未知',
-                                    platform: 'VRoid Hub',
-                                    format: 'VRM',
-                                    category: '角色类',
-                                    rating: 4.0 + Math.random(),
-                                    downloads: item.downloadCount || Math.floor(Math.random() * 1000),
-                                    tags: [keyword, 'VRoid', '3D', '角色', 'VRM'],
-                                    thumbnail: item.thumbnailUrl || '🎭',
-                                    description: item.description || '来自VRoid Hub的3D角色模型',
-                                    author: item.author || 'VRoid用户',
-                                    license: 'CC-BY',
-                                    licenseType: 'ccby',
-                                    licenseText: 'Creative Commons Attribution 4.0',
-                                    attribution: `"${item.name || 'VRoid角色'}"由${item.author || 'VRoid用户'}创作，源自VRoid Hub，基于CC BY 4.0协议授权。`,
-                                    date: item.createdAt ? item.createdAt.split('T')[0] : '2024-01-01',
-                                    downloadUrl: item.downloadUrl || `https://hub.vroid.com/characters/${item.id}`,
-                                    source: 'vroid',
-                                    modelType: '3D',
-                                    faceCount: item.faceCount || 0,
-                                    vertexCount: item.vertexCount || 0
-                                };
-                                
-                                results.push(resource);
-                            });
-                        }
-                    } else {
-                        console.log('VRoid Hub API调用失败，使用模拟数据');
-                        throw new Error(`VRoid Hub API错误: ${response.status}`);
+                const response = await fetch(searchUrl, {
+                    headers: {
+                        'X-Api-Version': VRoidConfig.apiVersion,
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
                     }
-                } catch (apiError) {
-                    console.log('VRoid Hub API调用失败，使用模拟数据:', apiError.message);
-                    
-                    // 使用模拟数据
-                    const mockVRoidResults = [];
-                    const vroidStyles = ['动漫', '写实', '卡通', '奇幻', '现代', '复古', '科幻', '可爱'];
-                    const characterTypes = ['学生', '战士', '法师', '偶像', '机器人', '精灵', '恶魔', '天使'];
-                    
-                    // 生成15个模拟VRoid结果
-                    for (let i = 1; i <= 15; i++) {
-                        const style = vroidStyles[i % vroidStyles.length];
-                        const charType = characterTypes[i % characterTypes.length];
-                        const isCC0 = i % 4 === 0; // 每4个中有1个是CC0
-                        
-                        mockVRoidResults.push({
-                            id: `vroid_${Date.now()}_${i}`,
-                            title: `${style}${charType}角色`,
-                            size: `${(10 + Math.random() * 30).toFixed(1)}MB`,
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`VRoid Hub API错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('VRoid Hub API响应:', data);
+                
+                if (data && data.data && data.data.length > 0) {
+                    data.data.forEach((item, index) => {
+                        const resource = {
+                            id: `vroid_${item.id}`,
+                            title: item.name || `VRoid角色 ${index + 1}`,
+                            size: item.latest_character_model_version?.original_file_size ? 
+                                  `${Math.round(item.latest_character_model_version.original_file_size / 1024 / 1024)}MB` : '未知',
                             platform: 'VRoid Hub',
                             format: 'VRM',
                             category: '角色类',
                             rating: 4.0 + Math.random() * 1.0,
-                            downloads: Math.floor(100 + Math.random() * 2000),
-                        tags: [keyword, 'VRoid', '3D', '角色', 'VRM', style, charType],
-                        thumbnail: getThumbnailImageUrl({
-                            category: '角色类',
-                            title: title,
-                            modelType: '3D'
-                        }),
-                            description: `来自VRoid Hub的${style}风格${charType}角色模型`,
-                            author: `VRoid_User_${i}`,
-                            license: isCC0 ? 'CC0' : 'CC-BY',
-                            licenseType: isCC0 ? 'cc0' : 'ccby',
-                            licenseText: isCC0 ? 'CC0 1.0 公共领域' : 'Creative Commons Attribution 4.0',
-                            attribution: isCC0 ? null : `"${style}${charType}角色"由VRoid_User_${i}创作，源自VRoid Hub，基于CC BY 4.0协议授权。`,
-                            date: '2024-01-' + (5 + i),
-                            downloadUrl: `https://hub.vroid.com/characters/${style}-${charType}-character`,
+                            downloads: item.download_count || 0,
+                            tags: item.tags ? item.tags.map(tag => tag.name) : [keyword, 'VRoid', '角色', 'VRM'],
+                            thumbnail: item.portrait_image?.sq300?.url || item.portrait_image?.original?.url || getRelevantThumbnailUrl('角色类', item.name),
+                            description: item.description || '来自VRoid Hub的3D角色模型',
+                            author: item.character?.user?.name || 'VRoid用户',
+                            license: 'VRoid Hub许可',
+                            licenseType: 'vroid',
+                            licenseText: 'VRoid Hub使用许可',
+                            attribution: 'VRoid Hub',
+                            date: item.published_at || item.created_at || '2024-01-01',
+                            downloadUrl: `https://hub.vroid.com/characters/${item.id}`,
                             source: 'vroid',
-                            modelType: '3D',
-                            faceCount: Math.floor(5000 + Math.random() * 15000),
-                            vertexCount: Math.floor(3000 + Math.random() * 10000)
-                        });
-                    }
-                    
-                    results.push(...mockVRoidResults);
+                            modelType: 'VRM',
+                            faceCount: item.latest_character_model_version?.triangle_count || 0,
+                            vertexCount: 0,
+                            isDownloadable: item.is_downloadable || false
+                        };
+                        
+                        results.push(resource);
+                    });
                 }
-                
-                console.log(`VRoid Hub搜索完成，找到${results.length}个结果`);
                 
             } catch (error) {
                 console.error('VRoid Hub搜索失败:', error);
+                // 如果API调用失败，返回模拟数据
+                return generateVRoidMockData(keyword);
             }
             
             return results;
+        }
+
+        // 生成VRoid Hub模拟数据
+        function generateVRoidMockData(keyword) {
+            const mockResults = [];
+            const characterTypes = ['动漫角色', '写实角色', '卡通角色', '奇幻角色', '科幻角色'];
+            
+            for (let i = 0; i < 5; i++) {
+                const characterType = characterTypes[i % characterTypes.length];
+                const resource = {
+                    id: `vroid_mock_${i + 1}`,
+                    title: `${characterType} - ${keyword}`,
+                    size: `${(5 + Math.random() * 15).toFixed(1)}MB`,
+                    platform: 'VRoid Hub',
+                    format: 'VRM',
+                    category: '角色类',
+                    rating: 4.0 + Math.random() * 1.0,
+                    downloads: Math.floor(100 + Math.random() * 500),
+                    tags: [keyword, 'VRoid', '角色', 'VRM', characterType],
+                    thumbnail: getRelevantThumbnailUrl('角色类', `${characterType} - ${keyword}`),
+                    description: `来自VRoid Hub的${characterType}模型，支持VRM格式`,
+                    author: `VRoidUser_${i + 1}`,
+                    license: 'VRoid Hub许可',
+                    licenseType: 'vroid',
+                    licenseText: 'VRoid Hub使用许可',
+                    attribution: 'VRoid Hub',
+                    date: '2024-01-01',
+                    downloadUrl: `https://hub.vroid.com/characters/mock_${i + 1}`,
+                    source: 'vroid',
+                    modelType: 'VRM',
+                    faceCount: Math.floor(5000 + Math.random() * 15000),
+                    vertexCount: Math.floor(3000 + Math.random() * 10000),
+                    isDownloadable: true
+                };
+                
+                mockResults.push(resource);
+            }
+            
+            return mockResults;
         }
 
         // 搜索Kenney.nl（模拟数据，因为无API）
