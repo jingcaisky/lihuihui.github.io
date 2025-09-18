@@ -1,0 +1,85 @@
+{
+  "name": "rpg-asset-manager",
+  "version": "2.0.0",
+  "description": "RPG美术资源自动化管理系统 - 桌面版",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "dist": "npm run build",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "test": "quick_test.bat",
+    "test:auto": "auto_test_runner.bat",
+    "test:simple": "simple_auto_test.bat",
+    "test:complete": "task_complete_auto_test.bat",
+    "test:dev": "python dev_auto_test.py"
+  },
+  "keywords": [
+    "rpg",
+    "game-assets",
+    "cc0",
+    "download-manager",
+    "resource-manager",
+    "electron",
+    "desktop-app"
+  ],
+  "author": "RPG Asset Manager Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "node-fetch": "^3.3.2",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7",
+    "child_process": "^1.0.2"
+  },
+  "build": {
+    "appId": "com.rpgassetmanager.app",
+    "productName": "RPG美术资源管理器",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "rpg_asset_manager_ui.html",
+      "assets/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.graphics-design"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png",
+      "category": "Graphics"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "RPG美术资源管理器"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rpg-asset-manager/desktop-app.git"
+  },
+  "homepage": "https://github.com/rpg-asset-manager/desktop-app#readme"
+}

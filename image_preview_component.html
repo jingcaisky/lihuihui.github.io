@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG资源管理器 - 图片预览组件演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #00d4ff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #00ff88;
+            font-size: 1.1rem;
+        }
+
+        /* 资源网格布局 */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* 资源卡片样式 */
+        .resource-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+
+        /* 缩略图容器 */
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+
+        /* 懒加载图片样式 */
+        .thumbnail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(1.1);
+        }
+
+        .thumbnail-image.loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 加载占位符 */
+        .thumbnail-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #666;
+            font-size: 48px;
+            transition: opacity 0.3s ease;
+        }
+
+        .thumbnail-placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 预览按钮 */
+        .preview-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #00d4ff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .resource-card:hover .preview-btn {
+            opacity: 1;
+        }
+
+        .preview-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* 资源信息 */
+        .resource-info {
+            padding: 20px;
+        }
+
+        .resource-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+
+        .resource-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .meta-tag {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .license-tag {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 16px;
+            overflow: hidden;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        .modal-info {
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #00d4ff;
+        }
+
+        .modal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal-tag {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-description {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e8e8e8;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.7);
+            transform: scale(1.1);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .resource-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 16px;
+            }
+            
+            .modal-content {
+                max-width: 95vw;
+                max-height: 95vh;
+            }
+            
+            .modal-info {
+                padding: 16px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+        }
+
+        /* 图片加载错误样式 */
+        .thumbnail-error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* 图片缩放效果 */
+        .thumbnail-container:hover .thumbnail-image {
+            transform: scale(1.05);
+        }
+
+        /* 进度条 */
+        .loading-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 RPG资源管理器 v2.0</h1>
+            <p>图片预览组件演示 - 支持懒加载、模态框展示、响应式布局</p>
+        </div>
+
+        <div class="resource-grid" id="resourceGrid">
+            <!-- 资源卡片将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <div class="modal-info">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <div class="modal-meta" id="modalMeta"></div>
+                <p class="modal-description" id="modalDescription"></p>
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-primary" onclick="downloadResource()">下载资源</button>
+                    <button class="modal-btn modal-btn-secondary" onclick="addToFavorites()">添加到收藏</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟API数据
+        const mockResources = [
+            {
+                id: 1,
+                title: '奇幻战士角色',
+                thumbnail_url: 'https://picsum.photos/400/300?random=1',
+                detail_url: 'https://picsum.photos/800/600?random=1',
+                size: '15.2MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC0',
+                category: '角色类',
+                description: '一个高质量的奇幻战士角色模型，包含完整的骨骼绑定和动画。适合RPG游戏使用。',
+                author: 'GameArtist123',
+                downloads: 1250,
+                rating: 4.2
+            },
+            {
+                id: 2,
+                title: '现代女性角色',
+                thumbnail_url: 'https://picsum.photos/400/300?random=2',
+                detail_url: 'https://picsum.photos/800/600?random=2',
+                size: '18.5MB',
+                format: 'FBX',
+                platform: 'Sketchfab',
+                license: 'CC-BY',
+                category: '角色类',
+                description: '现代风格的女性角色模型，适合现代游戏使用。包含多种服装和表情。',
+                author: 'ModernArtist',
+                downloads: 2100,
+                rating: 4.4
+            },
+            {
+                id: 3,
+                title: '卡通男孩角色',
+                thumbnail_url: 'https://picsum.photos/400/300?random=3',
+                detail_url: 'https://picsum.photos/800/600?random=3',
+                size: '12.3MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC0',
+                category: '角色类',
+                description: '可爱的卡通风格男孩角色模型，适合休闲游戏和儿童游戏。',
+                author: 'CartoonMaster',
+                downloads: 1800,
+                rating: 4.1
+            },
+            {
+                id: 4,
+                title: '机器人角色',
+                thumbnail_url: 'https://picsum.photos/400/300?random=4',
+                detail_url: 'https://picsum.photos/800/600?random=4',
+                size: '25.7MB',
+                format: 'FBX',
+                platform: 'Sketchfab',
+                license: 'CC-BY',
+                category: '角色类',
+                description: '未来科幻风格的机器人角色模型，包含发光效果和机械动画。',
+                author: 'SciFiCreator',
+                downloads: 1500,
+                rating: 4.6
+            },
+            {
+                id: 5,
+                title: '古代武士',
+                thumbnail_url: 'https://picsum.photos/400/300?random=5',
+                detail_url: 'https://picsum.photos/800/600?random=5',
+                size: '20.1MB',
+                format: 'FBX',
+                platform: 'Kenney.nl',
+                license: 'CC0',
+                category: '角色类',
+                description: '古代武士角色模型，包含传统服装和武器。适合历史题材游戏。',
+                author: 'Kenney',
+                downloads: 2200,
+                rating: 4.7
+            },
+            {
+                id: 6,
+                title: '中世纪长剑',
+                thumbnail_url: 'https://picsum.photos/400/300?random=6',
+                detail_url: 'https://picsum.photos/800/600?random=6',
+                size: '4.7MB',
+                format: 'Blend',
+                platform: 'Kenney.nl',
+                license: 'CC0',
+                category: '武器类',
+                description: '精美的中世纪风格长剑模型，适合RPG游戏使用。包含多种材质。',
+                author: 'Kenney',
+                downloads: 2100,
+                rating: 4.8
+            },
+            {
+                id: 7,
+                title: '石质城堡',
+                thumbnail_url: 'https://picsum.photos/400/300?random=7',
+                detail_url: 'https://picsum.photos/800/600?random=7',
+                size: '32.1MB',
+                format: 'OBJ',
+                platform: 'PolyHaven',
+                license: 'CC-BY',
+                category: '环境类',
+                description: '宏伟的石质城堡建筑模型，包含详细的纹理和材质。',
+                author: 'PolyHaven',
+                downloads: 890,
+                rating: 4.5
+            },
+            {
+                id: 8,
+                title: '魔法法杖',
+                thumbnail_url: 'https://picsum.photos/400/300?random=8',
+                detail_url: 'https://picsum.photos/800/600?random=8',
+                size: '8.9MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC-BY',
+                category: '武器类',
+                description: '神秘的魔法法杖模型，带有发光效果和粒子系统。',
+                author: 'MagicCreator',
+                downloads: 1560,
+                rating: 4.1
+            }
+        ];
+
+        let currentResource = null;
+
+        // 图片懒加载类
+        class LazyImageLoader {
+            constructor() {
+                this.imageObserver = null;
+                this.initIntersectionObserver();
+            }
+
+            initIntersectionObserver() {
+                if ('IntersectionObserver' in window) {
+                    this.imageObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                this.loadImage(entry.target);
+                                this.imageObserver.unobserve(entry.target);
+                            }
+                        });
+                    }, {
+                        rootMargin: '50px 0px',
+                        threshold: 0.1
+                    });
+                }
+            }
+
+            observeImage(imgElement) {
+                if (this.imageObserver) {
+                    this.imageObserver.observe(imgElement);
+                } else {
+                    // 降级处理：直接加载图片
+                    this.loadImage(imgElement);
+                }
+            }
+
+            loadImage(imgElement) {
+                const src = imgElement.dataset.src;
+                const placeholder = imgElement.parentElement.querySelector('.thumbnail-placeholder');
+                const progressBar = imgElement.parentElement.querySelector('.loading-progress');
+
+                if (!src) return;
+
+                // 显示加载进度
+                if (progressBar) {
+                    progressBar.style.width = '30%';
+                }
+
+                const img = new Image();
+                img.onload = () => {
+                    imgElement.src = src;
+                    imgElement.classList.add('loaded');
+                    
+                    if (placeholder) {
+                        placeholder.classList.add('hidden');
+                    }
+                    
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                        setTimeout(() => {
+                            progressBar.style.opacity = '0';
+                        }, 300);
+                    }
+                };
+
+                img.onerror = () => {
+                    if (placeholder) {
+                        placeholder.innerHTML = '<div class="thumbnail-error">图片加载失败</div>';
+                    }
+                    if (progressBar) {
+                        progressBar.style.display = 'none';
+                    }
+                };
+
+                img.src = src;
+            }
+        }
+
+        // 初始化懒加载器
+        const lazyLoader = new LazyImageLoader();
+
+        // 创建资源卡片
+        function createResourceCard(resource) {
+            return `
+                <div class="resource-card" onclick="openModal(${resource.id})">
+                    <div class="thumbnail-container">
+                        <img class="thumbnail-image" 
+                             data-src="${resource.thumbnail_url}" 
+                             alt="${resource.title}"
+                             loading="lazy">
+                        <div class="thumbnail-placeholder">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <div class="loading-progress"></div>
+                        <button class="preview-btn" onclick="event.stopPropagation(); openModal(${resource.id})">
+                            👁️ 预览
+                        </button>
+                    </div>
+                    <div class="resource-info">
+                        <h3 class="resource-title">${resource.title}</h3>
+                        <div class="resource-meta">
+                            <span class="meta-tag">${resource.size}</span>
+                            <span class="meta-tag">${resource.format}</span>
+                            <span class="meta-tag">${resource.platform}</span>
+                            <span class="meta-tag license-tag">${resource.license}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染资源网格
+        function renderResourceGrid() {
+            const grid = document.getElementById('resourceGrid');
+            grid.innerHTML = mockResources.map(createResourceCard).join('');
+
+            // 初始化懒加载
+            const images = grid.querySelectorAll('.thumbnail-image');
+            images.forEach(img => {
+                lazyLoader.observeImage(img);
+            });
+        }
+
+        // 打开模态框
+        function openModal(resourceId) {
+            const resource = mockResources.find(r => r.id === resourceId);
+            if (!resource) return;
+
+            currentResource = resource;
+
+            // 设置模态框内容
+            document.getElementById('modalImage').src = resource.detail_url;
+            document.getElementById('modalTitle').textContent = resource.title;
+            document.getElementById('modalDescription').textContent = resource.description;
+
+            // 设置元数据
+            const modalMeta = document.getElementById('modalMeta');
+            modalMeta.innerHTML = `
+                <span class="modal-tag">${resource.size}</span>
+                <span class="modal-tag">${resource.format}</span>
+                <span class="modal-tag">${resource.platform}</span>
+                <span class="modal-tag license-tag">${resource.license}</span>
+                <span class="modal-tag">★ ${resource.rating}</span>
+                <span class="modal-tag">⬇️ ${resource.downloads}</span>
+            `;
+
+            // 显示模态框
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentResource = null;
+        }
+
+        // 下载资源
+        function downloadResource() {
+            if (currentResource) {
+                alert(`开始下载: ${currentResource.title}`);
+                // 这里可以集成实际的下载逻辑
+            }
+        }
+
+        // 添加到收藏
+        function addToFavorites() {
+            if (currentResource) {
+                alert(`已添加到收藏: ${currentResource.title}`);
+                // 这里可以集成实际的收藏逻辑
+            }
+        }
+
+        // 键盘事件处理
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // 点击模态框背景关闭
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal();
+            }
+        });
+
+        // 页面加载完成后渲染
+        document.addEventListener('DOMContentLoaded', () => {
+            renderResourceGrid();
+        });
+
+        // 模拟从后端API获取数据
+        async function fetchResourcesFromAPI() {
+            try {
+                // 这里可以替换为实际的API调用
+                // const response = await fetch('/api/resources');
+                // const data = await response.json();
+                // return data;
+                
+                // 模拟API延迟
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return mockResources;
+            } catch (error) {
+                console.error('获取资源数据失败:', error);
+                return [];
+            }
+        }
+
+        // 刷新资源数据
+        async function refreshResources() {
+            const resources = await fetchResourcesFromAPI();
+            // 更新资源网格
+            renderResourceGrid();
+        }
+    </script>
+</body>
+</html>

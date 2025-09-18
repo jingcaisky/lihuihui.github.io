@@ -1,0 +1,501 @@
+<!-- 下载管理面板 -->
+<div id="download-panel" class="panel">
+    <div class="search-panel">
+        <div class="panel-title">⬇️ 下载任务管理</div>
+        
+        <!-- 下载统计 -->
+        <div class="download-stats">
+            <div class="stat-item">
+                <span class="stat-number" id="active-downloads">3</span>
+                <span class="stat-label">进行中</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="waiting-downloads">2</span>
+                <span class="stat-label">等待中</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="completed-downloads">15</span>
+                <span class="stat-label">已完成</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="failed-downloads">1</span>
+                <span class="stat-label">失败</span>
+            </div>
+        </div>
+
+        <!-- 下载控制按钮 -->
+        <div class="download-controls">
+            <button class="control-button primary" onclick="pauseAllDownloads()">⏸️ 暂停全部</button>
+            <button class="control-button primary" onclick="resumeAllDownloads()">▶️ 继续全部</button>
+            <button class="control-button secondary" onclick="cancelSelected()">❌ 取消选中</button>
+            <button class="control-button secondary" onclick="clearCompleted()">🗑️ 清空已完成</button>
+        </div>
+
+        <!-- 下载任务列表 -->
+        <div class="download-list">
+            <div class="download-item active">
+                <div class="download-info">
+                    <input type="checkbox" class="download-checkbox">
+                    <div class="download-icon">📁</div>
+                    <div class="download-details">
+                        <div class="download-name">奇幻战士角色.fbx</div>
+                        <div class="download-meta">
+                            <span>大小: 15.2MB</span>
+                            <span>速度: 3.2MB/s</span>
+                            <span>剩余: 00:12</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                    <div class="progress-text">75%</div>
+                </div>
+                <div class="download-actions">
+                    <button class="action-button" onclick="pauseDownload(this)">⏸️</button>
+                    <button class="action-button" onclick="cancelDownload(this)">❌</button>
+                </div>
+            </div>
+
+            <div class="download-item active">
+                <div class="download-info">
+                    <input type="checkbox" class="download-checkbox">
+                    <div class="download-icon">🗡️</div>
+                    <div class="download-details">
+                        <div class="download-name">中世纪长剑.blend</div>
+                        <div class="download-meta">
+                            <span>大小: 4.7MB</span>
+                            <span>速度: 1.5MB/s</span>
+                            <span>剩余: 00:25</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="progress-text">45%</div>
+                </div>
+                <div class="download-actions">
+                    <button class="action-button" onclick="pauseDownload(this)">⏸️</button>
+                    <button class="action-button" onclick="cancelDownload(this)">❌</button>
+                </div>
+            </div>
+
+            <div class="download-item active">
+                <div class="download-info">
+                    <input type="checkbox" class="download-checkbox">
+                    <div class="download-icon">🏰</div>
+                    <div class="download-details">
+                        <div class="download-name">石质城堡.obj</div>
+                        <div class="download-meta">
+                            <span>大小: 32.1MB</span>
+                            <span>速度: 2.8MB/s</span>
+                            <span>剩余: 00:08</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%"></div>
+                    </div>
+                    <div class="progress-text">68%</div>
+                </div>
+                <div class="download-actions">
+                    <button class="action-button" onclick="pauseDownload(this)">⏸️</button>
+                    <button class="action-button" onclick="cancelDownload(this)">❌</button>
+                </div>
+            </div>
+
+            <div class="download-item waiting">
+                <div class="download-info">
+                    <input type="checkbox" class="download-checkbox">
+                    <div class="download-icon">⚡</div>
+                    <div class="download-details">
+                        <div class="download-name">魔法特效包.zip</div>
+                        <div class="download-meta">
+                            <span>大小: 12.5MB</span>
+                            <span>状态: 等待中</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">等待中</div>
+                </div>
+                <div class="download-actions">
+                    <button class="action-button" onclick="startDownload(this)">▶️</button>
+                    <button class="action-button" onclick="cancelDownload(this)">❌</button>
+                </div>
+            </div>
+
+            <div class="download-item completed">
+                <div class="download-info">
+                    <input type="checkbox" class="download-checkbox">
+                    <div class="download-icon">✅</div>
+                    <div class="download-details">
+                        <div class="download-name">UI图标包.png</div>
+                        <div class="download-meta">
+                            <span>大小: 2.3MB</span>
+                            <span>完成时间: 2024-01-15 14:30</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-text">已完成</div>
+                </div>
+                <div class="download-actions">
+                    <button class="action-button" onclick="openFile(this)">📂</button>
+                    <button class="action-button" onclick="removeDownload(this)">🗑️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 下载管理面板样式 */
+.download-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(44, 62, 80, 0.5);
+    border-radius: 6px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #E67E22;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #BDC3C7;
+}
+
+.download-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.control-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.control-button.primary {
+    background: #E67E22;
+    color: white;
+}
+
+.control-button.primary:hover {
+    background: #D35400;
+}
+
+.control-button.secondary {
+    background: transparent;
+    color: #E67E22;
+    border: 1px solid #E67E22;
+}
+
+.control-button.secondary:hover {
+    background: #E67E22;
+    color: white;
+}
+
+.download-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.download-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #7F8C8D;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: rgba(44, 62, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.download-item:hover {
+    border-color: #E67E22;
+    background: rgba(230, 126, 34, 0.1);
+}
+
+.download-item.active {
+    border-color: #2ECC71;
+}
+
+.download-item.waiting {
+    border-color: #F39C12;
+}
+
+.download-item.completed {
+    border-color: #27AE60;
+    opacity: 0.7;
+}
+
+.download-item.failed {
+    border-color: #E74C3C;
+}
+
+.download-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.download-checkbox {
+    width: 18px;
+    height: 18px;
+}
+
+.download-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+}
+
+.download-details {
+    flex: 1;
+}
+
+.download-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.download-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #BDC3C7;
+}
+
+.download-progress {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #7F8C8D;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2ECC71, #27AE60);
+    transition: width 0.3s ease;
+}
+
+.download-item.active .progress-fill {
+    background: linear-gradient(90deg, #2ECC71, #27AE60);
+}
+
+.download-item.waiting .progress-fill {
+    background: linear-gradient(90deg, #F39C12, #E67E22);
+}
+
+.download-item.completed .progress-fill {
+    background: linear-gradient(90deg, #27AE60, #2ECC71);
+}
+
+.progress-text {
+    font-size: 12px;
+    text-align: center;
+    color: #BDC3C7;
+}
+
+.download-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.download-actions .action-button {
+    padding: 6px 10px;
+    border: 1px solid #E67E22;
+    background: transparent;
+    color: #E67E22;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.download-actions .action-button:hover {
+    background: #E67E22;
+    color: white;
+}
+</style>
+
+<script>
+// 下载管理功能
+function pauseAllDownloads() {
+    document.querySelectorAll('.download-item.active').forEach(item => {
+        const pauseBtn = item.querySelector('.action-button');
+        if (pauseBtn && pauseBtn.textContent.includes('⏸️')) {
+            pauseBtn.click();
+        }
+    });
+}
+
+function resumeAllDownloads() {
+    document.querySelectorAll('.download-item.waiting').forEach(item => {
+        const startBtn = item.querySelector('.action-button');
+        if (startBtn && startBtn.textContent.includes('▶️')) {
+            startBtn.click();
+        }
+    });
+}
+
+function cancelSelected() {
+    const selectedItems = document.querySelectorAll('.download-checkbox:checked');
+    if (selectedItems.length === 0) {
+        alert('请先选择要取消的下载任务');
+        return;
+    }
+    
+    if (confirm(`确定要取消 ${selectedItems.length} 个下载任务吗？`)) {
+        selectedItems.forEach(checkbox => {
+            const downloadItem = checkbox.closest('.download-item');
+            downloadItem.remove();
+        });
+        updateDownloadStats();
+    }
+}
+
+function clearCompleted() {
+    const completedItems = document.querySelectorAll('.download-item.completed');
+    if (completedItems.length === 0) {
+        alert('没有已完成的下载任务');
+        return;
+    }
+    
+    if (confirm(`确定要清空 ${completedItems.length} 个已完成的下载任务吗？`)) {
+        completedItems.forEach(item => {
+            item.remove();
+        });
+        updateDownloadStats();
+    }
+}
+
+function pauseDownload(button) {
+    const downloadItem = button.closest('.download-item');
+    downloadItem.classList.remove('active');
+    downloadItem.classList.add('waiting');
+    button.textContent = '▶️';
+    button.onclick = function() { startDownload(this); };
+    
+    const progressText = downloadItem.querySelector('.progress-text');
+    progressText.textContent = '已暂停';
+    
+    updateDownloadStats();
+}
+
+function startDownload(button) {
+    const downloadItem = button.closest('.download-item');
+    downloadItem.classList.remove('waiting');
+    downloadItem.classList.add('active');
+    button.textContent = '⏸️';
+    button.onclick = function() { pauseDownload(this); };
+    
+    const progressText = downloadItem.querySelector('.progress-text');
+    progressText.textContent = '下载中...';
+    
+    updateDownloadStats();
+}
+
+function cancelDownload(button) {
+    const downloadItem = button.closest('.download-item');
+    if (confirm('确定要取消这个下载任务吗？')) {
+        downloadItem.remove();
+        updateDownloadStats();
+    }
+}
+
+function openFile(button) {
+    const downloadItem = button.closest('.download-item');
+    const fileName = downloadItem.querySelector('.download-name').textContent;
+    alert(`打开文件: ${fileName}`);
+}
+
+function removeDownload(button) {
+    const downloadItem = button.closest('.download-item');
+    if (confirm('确定要删除这个下载记录吗？')) {
+        downloadItem.remove();
+        updateDownloadStats();
+    }
+}
+
+function updateDownloadStats() {
+    const activeCount = document.querySelectorAll('.download-item.active').length;
+    const waitingCount = document.querySelectorAll('.download-item.waiting').length;
+    const completedCount = document.querySelectorAll('.download-item.completed').length;
+    const failedCount = document.querySelectorAll('.download-item.failed').length;
+    
+    document.getElementById('active-downloads').textContent = activeCount;
+    document.getElementById('waiting-downloads').textContent = waitingCount;
+    document.getElementById('completed-downloads').textContent = completedCount;
+    document.getElementById('failed-downloads').textContent = failedCount;
+}
+
+// 模拟下载进度更新
+function simulateDownloadProgress() {
+    document.querySelectorAll('.download-item.active').forEach(item => {
+        const progressFill = item.querySelector('.progress-fill');
+        const progressText = item.querySelector('.progress-text');
+        const currentWidth = parseInt(progressFill.style.width);
+        
+        if (currentWidth < 100) {
+            const newWidth = Math.min(currentWidth + Math.random() * 5, 100);
+            progressFill.style.width = newWidth + '%';
+            progressText.textContent = Math.round(newWidth) + '%';
+            
+            if (newWidth >= 100) {
+                item.classList.remove('active');
+                item.classList.add('completed');
+                progressText.textContent = '已完成';
+                
+                const actions = item.querySelector('.download-actions');
+                actions.innerHTML = `
+                    <button class="action-button" onclick="openFile(this)">📂</button>
+                    <button class="action-button" onclick="removeDownload(this)">🗑️</button>
+                `;
+                
+                updateDownloadStats();
+            }
+        }
+    });
+}
+
+// 每2秒更新一次下载进度
+setInterval(simulateDownloadProgress, 2000);
+</script>

@@ -1,0 +1,693 @@
+<!-- 设置面板 -->
+<div id="settings-panel" class="panel">
+    <div class="search-panel">
+        <div class="panel-title">⚙️ 系统设置</div>
+        
+        <!-- 设置标签页 -->
+        <div class="settings-tabs">
+            <button class="tab-button active" onclick="showSettingsTab('download')">下载设置</button>
+            <button class="tab-button" onclick="showSettingsTab('search')">搜索设置</button>
+            <button class="tab-button" onclick="showSettingsTab('motrix')">Motrix设置</button>
+            <button class="tab-button" onclick="showSettingsTab('category')">分类设置</button>
+            <button class="tab-button" onclick="showSettingsTab('advanced')">高级设置</button>
+        </div>
+
+        <!-- 下载设置 -->
+        <div id="download-settings" class="settings-tab active">
+            <div class="settings-section">
+                <h4>📥 下载配置</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>下载目录:</label>
+                        <div class="input-group">
+                            <input type="text" id="download-dir" class="form-input" value="H:\XJ\rpg_assets" readonly>
+                            <button class="action-button" onclick="browseDownloadDir()">浏览...</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>最大并发下载:</label>
+                        <input type="number" id="max-concurrent" class="form-input" value="5" min="1" max="10">
+                    </div>
+                    <div class="setting-item">
+                        <label>下载超时(秒):</label>
+                        <input type="number" id="download-timeout" class="form-input" value="300" min="60" max="3600">
+                    </div>
+                    <div class="setting-item">
+                        <label>重试次数:</label>
+                        <input type="number" id="retry-count" class="form-input" value="3" min="0" max="10">
+                    </div>
+                    <div class="setting-item">
+                        <label>重试间隔(秒):</label>
+                        <input type="number" id="retry-interval" class="form-input" value="5" min="1" max="60">
+                    </div>
+                </div>
+                <div class="setting-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enable-resume" checked>
+                        <span>启用断点续传</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="verify-files" checked>
+                        <span>下载完成后验证文件完整性</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="auto-extract">
+                        <span>自动解压ZIP文件</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索设置 -->
+        <div id="search-settings" class="settings-tab">
+            <div class="settings-section">
+                <h4>🔍 搜索配置</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>默认搜索数量:</label>
+                        <input type="number" id="default-search-count" class="form-input" value="10" min="1" max="100">
+                    </div>
+                    <div class="setting-item">
+                        <label>请求超时(秒):</label>
+                        <input type="number" id="request-timeout" class="form-input" value="15" min="5" max="60">
+                    </div>
+                    <div class="setting-item">
+                        <label>重试次数:</label>
+                        <input type="number" id="search-retry-count" class="form-input" value="3" min="0" max="10">
+                    </div>
+                    <div class="setting-item">
+                        <label>请求延迟(秒):</label>
+                        <input type="number" id="request-delay" class="form-input" value="1" min="0" max="5" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label>并发线程数:</label>
+                        <input type="number" id="concurrent-threads" class="form-input" value="5" min="1" max="10">
+                    </div>
+                    <div class="setting-item">
+                        <label>每源最大结果:</label>
+                        <input type="number" id="max-per-source" class="form-input" value="3" min="1" max="20">
+                    </div>
+                </div>
+                <div class="setting-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="smart-dedup" checked>
+                        <span>智能去重</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="auto-classify" checked>
+                        <span>自动分类</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="save-search-history">
+                        <span>保存搜索历史</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motrix设置 -->
+        <div id="motrix-settings" class="settings-tab">
+            <div class="settings-section">
+                <h4>⚡ Motrix配置</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>服务器地址:</label>
+                        <input type="text" id="motrix-host" class="form-input" value="127.0.0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label>端口:</label>
+                        <input type="number" id="motrix-port" class="form-input" value="16800" min="1" max="65535">
+                    </div>
+                    <div class="setting-item">
+                        <label>RPC Token:</label>
+                        <input type="password" id="motrix-token" class="form-input" value="a2HrlXF2L18b">
+                    </div>
+                    <div class="setting-item">
+                        <label>连接超时(秒):</label>
+                        <input type="number" id="motrix-timeout" class="form-input" value="10" min="1" max="60">
+                    </div>
+                </div>
+                <div class="connection-test">
+                    <button class="control-button primary" onclick="testMotrixConnection()">测试连接</button>
+                    <div id="connection-status" class="connection-status">
+                        <span class="status-dot"></span>
+                        <span>未测试</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分类设置 -->
+        <div id="category-settings" class="settings-tab">
+            <div class="settings-section">
+                <h4>📁 分类配置</h4>
+                <div class="setting-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enable-auto-classify" checked>
+                        <span>启用自动分类</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="auto-create-dirs" checked>
+                        <span>自动创建分类目录</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="move-to-category">
+                        <span>下载后自动移动到分类目录</span>
+                    </label>
+                </div>
+                <div class="category-rules">
+                    <h5>分类规则管理</h5>
+                    <div class="rules-list">
+                        <div class="rule-item">
+                            <div class="rule-header">
+                                <span class="rule-name">角色类</span>
+                                <button class="action-button" onclick="editRule('characters')">编辑</button>
+                            </div>
+                            <div class="rule-content">
+                                <strong>关键词:</strong> character, hero, player, npc, avatar, person, warrior, mage<br>
+                                <strong>文件类型:</strong> .blend, .fbx, .obj, .dae
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-header">
+                                <span class="rule-name">武器类</span>
+                                <button class="action-button" onclick="editRule('weapons')">编辑</button>
+                            </div>
+                            <div class="rule-content">
+                                <strong>关键词:</strong> weapon, sword, bow, staff, magic, blade, axe, spear<br>
+                                <strong>文件类型:</strong> .blend, .fbx, .obj, .dae
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-header">
+                                <span class="rule-name">护甲类</span>
+                                <button class="action-button" onclick="editRule('armor')">编辑</button>
+                            </div>
+                            <div class="rule-content">
+                                <strong>关键词:</strong> armor, helmet, shield, clothing, equipment, gear<br>
+                                <strong>文件类型:</strong> .blend, .fbx, .obj, .dae
+                            </div>
+                        </div>
+                    </div>
+                    <button class="control-button secondary" onclick="addNewRule()">添加新规则</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 高级设置 -->
+        <div id="advanced-settings" class="settings-tab">
+            <div class="settings-section">
+                <h4>🔧 高级配置</h4>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>日志级别:</label>
+                        <select id="log-level" class="form-select">
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="INFO" selected>INFO</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="ERROR">ERROR</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>日志文件大小(MB):</label>
+                        <input type="number" id="log-file-size" class="form-input" value="10" min="1" max="100">
+                    </div>
+                    <div class="setting-item">
+                        <label>保留日志文件数:</label>
+                        <input type="number" id="log-file-count" class="form-input" value="5" min="1" max="20">
+                    </div>
+                    <div class="setting-item">
+                        <label>缓存大小(MB):</label>
+                        <input type="number" id="cache-size" class="form-input" value="100" min="10" max="1000">
+                    </div>
+                </div>
+                <div class="setting-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enable-cache" checked>
+                        <span>启用搜索结果缓存</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="auto-update">
+                        <span>自动检查更新</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="send-analytics">
+                        <span>发送匿名使用统计</span>
+                    </label>
+                </div>
+                <div class="advanced-actions">
+                    <button class="control-button secondary" onclick="clearCache()">清空缓存</button>
+                    <button class="control-button secondary" onclick="exportSettings()">导出设置</button>
+                    <button class="control-button secondary" onclick="importSettings()">导入设置</button>
+                    <button class="control-button danger" onclick="resetSettings()">恢复默认</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置操作按钮 -->
+        <div class="settings-actions">
+            <button class="control-button primary" onclick="saveSettings()">保存设置</button>
+            <button class="control-button secondary" onclick="cancelSettings()">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 分类规则编辑对话框 -->
+<div id="rule-edit-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📝 编辑分类规则</h3>
+            <button class="close-button" onclick="closeModal('rule-edit-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="rule-edit-form">
+                <div class="form-group">
+                    <label>规则名称:</label>
+                    <input type="text" id="rule-name" class="form-input" placeholder="输入规则名称">
+                </div>
+                <div class="form-group">
+                    <label>关键词 (用逗号分隔):</label>
+                    <textarea id="rule-keywords" class="form-textarea" placeholder="character, hero, player, npc..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>文件扩展名 (用逗号分隔):</label>
+                    <textarea id="rule-extensions" class="form-textarea" placeholder=".blend, .fbx, .obj, .dae"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>排除关键词 (用逗号分隔):</label>
+                    <textarea id="rule-exclude" class="form-textarea" placeholder="weapon, armor, environment..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="control-button primary" onclick="saveRule()">保存规则</button>
+            <button class="control-button secondary" onclick="closeModal('rule-edit-modal')">取消</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 设置面板样式 */
+.settings-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #7F8C8D;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: #BDC3C7;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    color: #ECF0F1;
+    background: rgba(230, 126, 34, 0.1);
+}
+
+.tab-button.active {
+    color: #E67E22;
+    border-bottom-color: #E67E22;
+}
+
+.settings-tab {
+    display: none;
+}
+
+.settings-tab.active {
+    display: block;
+}
+
+.settings-section {
+    background: rgba(44, 62, 80, 0.3);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.settings-section h4 {
+    color: #E67E22;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.setting-item label {
+    font-size: 12px;
+    color: #BDC3C7;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group .form-input {
+    flex: 1;
+}
+
+.setting-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.connection-test {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.connection-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7F8C8D;
+}
+
+.connection-status.connected .status-dot {
+    background: #2ECC71;
+}
+
+.connection-status.error .status-dot {
+    background: #E74C3C;
+}
+
+.category-rules {
+    margin-top: 20px;
+}
+
+.category-rules h5 {
+    color: #E67E22;
+    margin-bottom: 15px;
+}
+
+.rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.rule-item {
+    background: rgba(52, 73, 94, 0.5);
+    border: 1px solid #7F8C8D;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.rule-name {
+    font-weight: bold;
+    color: #E67E22;
+}
+
+.rule-content {
+    font-size: 12px;
+    color: #BDC3C7;
+    line-height: 1.5;
+}
+
+.advanced-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.control-button.danger {
+    background: #E74C3C;
+    color: white;
+}
+
+.control-button.danger:hover {
+    background: #C0392B;
+}
+
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #7F8C8D;
+}
+
+.form-textarea {
+    padding: 8px 12px;
+    border: 1px solid #7F8C8D;
+    border-radius: 4px;
+    background: #34495E;
+    color: #ECF0F1;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #E67E22;
+    box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
+}
+</style>
+
+<script>
+// 设置面板功能
+function showSettingsTab(tabName) {
+    // 隐藏所有标签页
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // 移除所有标签按钮的active状态
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // 显示选中的标签页
+    document.getElementById(tabName + '-settings').classList.add('active');
+    
+    // 激活对应的标签按钮
+    event.target.classList.add('active');
+}
+
+function browseDownloadDir() {
+    // 这里应该调用文件选择对话框
+    alert('文件选择对话框功能需要集成文件系统API');
+}
+
+function testMotrixConnection() {
+    const status = document.getElementById('connection-status');
+    const host = document.getElementById('motrix-host').value;
+    const port = document.getElementById('motrix-port').value;
+    const token = document.getElementById('motrix-token').value;
+    
+    status.innerHTML = '<span class="status-dot"></span><span>测试中...</span>';
+    
+    // 模拟连接测试
+    setTimeout(() => {
+        // 这里应该实际测试Motrix连接
+        const success = Math.random() > 0.3; // 模拟70%成功率
+        
+        if (success) {
+            status.innerHTML = '<span class="status-dot"></span><span>连接成功</span>';
+            status.classList.add('connected');
+            status.classList.remove('error');
+        } else {
+            status.innerHTML = '<span class="status-dot"></span><span>连接失败</span>';
+            status.classList.add('error');
+            status.classList.remove('connected');
+        }
+    }, 2000);
+}
+
+function editRule(ruleType) {
+    const rules = {
+        'characters': {
+            name: '角色类',
+            keywords: 'character, hero, player, npc, avatar, person, warrior, mage',
+            extensions: '.blend, .fbx, .obj, .dae',
+            exclude: 'weapon, armor, environment, ui, effect'
+        },
+        'weapons': {
+            name: '武器类',
+            keywords: 'weapon, sword, bow, staff, magic, blade, axe, spear',
+            extensions: '.blend, .fbx, .obj, .dae',
+            exclude: 'character, armor, environment, ui, effect'
+        },
+        'armor': {
+            name: '护甲类',
+            keywords: 'armor, helmet, shield, clothing, equipment, gear',
+            extensions: '.blend, .fbx, .obj, .dae',
+            exclude: 'character, weapon, environment, ui, effect'
+        }
+    };
+    
+    const rule = rules[ruleType];
+    if (rule) {
+        document.getElementById('rule-name').value = rule.name;
+        document.getElementById('rule-keywords').value = rule.keywords;
+        document.getElementById('rule-extensions').value = rule.extensions;
+        document.getElementById('rule-exclude').value = rule.exclude;
+        
+        showModal('rule-edit-modal');
+    }
+}
+
+function addNewRule() {
+    document.getElementById('rule-name').value = '';
+    document.getElementById('rule-keywords').value = '';
+    document.getElementById('rule-extensions').value = '';
+    document.getElementById('rule-exclude').value = '';
+    
+    showModal('rule-edit-modal');
+}
+
+function saveRule() {
+    const name = document.getElementById('rule-name').value;
+    const keywords = document.getElementById('rule-keywords').value;
+    const extensions = document.getElementById('rule-extensions').value;
+    const exclude = document.getElementById('rule-exclude').value;
+    
+    if (!name.trim() || !keywords.trim()) {
+        alert('请填写规则名称和关键词');
+        return;
+    }
+    
+    alert(`保存规则: ${name}`);
+    closeModal('rule-edit-modal');
+}
+
+function clearCache() {
+    if (confirm('确定要清空所有缓存吗？')) {
+        alert('缓存已清空');
+    }
+}
+
+function exportSettings() {
+    alert('正在导出设置...');
+    // 这里可以添加实际的导出逻辑
+}
+
+function importSettings() {
+    alert('请选择要导入的设置文件...');
+    // 这里可以添加实际的导入逻辑
+}
+
+function resetSettings() {
+    if (confirm('确定要恢复所有设置为默认值吗？此操作不可撤销。')) {
+        alert('设置已恢复为默认值');
+        // 这里可以添加实际的重置逻辑
+    }
+}
+
+function saveSettings() {
+    // 收集所有设置值
+    const settings = {
+        download: {
+            dir: document.getElementById('download-dir').value,
+            maxConcurrent: document.getElementById('max-concurrent').value,
+            timeout: document.getElementById('download-timeout').value,
+            retryCount: document.getElementById('retry-count').value,
+            retryInterval: document.getElementById('retry-interval').value,
+            enableResume: document.getElementById('enable-resume').checked,
+            verifyFiles: document.getElementById('verify-files').checked,
+            autoExtract: document.getElementById('auto-extract').checked
+        },
+        search: {
+            defaultCount: document.getElementById('default-search-count').value,
+            timeout: document.getElementById('request-timeout').value,
+            retryCount: document.getElementById('search-retry-count').value,
+            delay: document.getElementById('request-delay').value,
+            concurrentThreads: document.getElementById('concurrent-threads').value,
+            maxPerSource: document.getElementById('max-per-source').value,
+            smartDedup: document.getElementById('smart-dedup').checked,
+            autoClassify: document.getElementById('auto-classify').checked,
+            saveHistory: document.getElementById('save-search-history').checked
+        },
+        motrix: {
+            host: document.getElementById('motrix-host').value,
+            port: document.getElementById('motrix-port').value,
+            token: document.getElementById('motrix-token').value,
+            timeout: document.getElementById('motrix-timeout').value
+        },
+        category: {
+            enableAutoClassify: document.getElementById('enable-auto-classify').checked,
+            autoCreateDirs: document.getElementById('auto-create-dirs').checked,
+            moveToCategory: document.getElementById('move-to-category').checked
+        },
+        advanced: {
+            logLevel: document.getElementById('log-level').value,
+            logFileSize: document.getElementById('log-file-size').value,
+            logFileCount: document.getElementById('log-file-count').value,
+            cacheSize: document.getElementById('cache-size').value,
+            enableCache: document.getElementById('enable-cache').checked,
+            autoUpdate: document.getElementById('auto-update').checked,
+            sendAnalytics: document.getElementById('send-analytics').checked
+        }
+    };
+    
+    // 这里应该保存设置到配置文件
+    console.log('保存设置:', settings);
+    alert('设置已保存');
+}
+
+function cancelSettings() {
+    if (confirm('确定要取消修改吗？未保存的更改将丢失。')) {
+        // 这里可以重新加载设置
+        alert('已取消修改');
+    }
+}
+
+// 初始化设置面板
+document.addEventListener('DOMContentLoaded', function() {
+    // 这里可以加载保存的设置
+    console.log('设置面板已初始化');
+});
+</script>

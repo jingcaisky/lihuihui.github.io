@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG资源管理器 v2.0 - 增强版预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: fit-content;
+        }
+
+        .sidebar h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .sidebar h3 {
+            color: #00ff88;
+            margin: 20px 0 12px 0;
+            font-size: 16px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .sidebar li:hover {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .page-title {
+            color: #00d4ff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #e8e8e8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .view-btn.active {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .view-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        /* 资源列表样式 */
+        .resource-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .resource-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .resource-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .resource-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .resource-item:hover .resource-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .resource-info {
+            padding: 20px;
+        }
+
+        .resource-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+
+        .resource-license {
+            font-size: 14px;
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .resource-license.cc-by {
+            color: #ffc107;
+            background: rgba(255, 193, 7, 0.2);
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .resource-description {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #00d4ff;
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 错误状态 */
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #ff6b6b;
+            font-size: 18px;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 32px;
+            border-radius: 20px;
+            position: relative;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            display: block;
+            margin: 0 auto 24px auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 16px;
+            color: #00d4ff;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .modal-license {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-description {
+            color: #ccc;
+            line-height: 1.6;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .pagination button {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #e8e8e8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .resource-list {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 16px;
+            }
+
+            .modal-content {
+                max-width: 95vw;
+                max-height: 95vh;
+                padding: 20px;
+            }
+
+            .modal-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <h2>🔍 筛选资源</h2>
+            <h3>许可证类型</h3>
+            <ul>
+                <li onclick="filterByLicense('all')">显示全部免费资源</li>
+                <li onclick="filterByLicense('cc0')">CC0 (公共领域)</li>
+                <li onclick="filterByLicense('cc-by')">CC-BY (需署名)</li>
+            </ul>
+            <h3>资源类型</h3>
+            <ul>
+                <li onclick="filterByCategory('all')">全部</li>
+                <li onclick="filterByCategory('角色类')">角色类</li>
+                <li onclick="filterByCategory('武器类')">武器类</li>
+                <li onclick="filterByCategory('环境类')">环境类</li>
+                <li onclick="filterByCategory('UI元素')">UI元素</li>
+            </ul>
+            <h3>平台来源</h3>
+            <ul>
+                <li onclick="filterByPlatform('all')">全部平台</li>
+                <li onclick="filterByPlatform('OpenGameArt')">OpenGameArt</li>
+                <li onclick="filterByPlatform('Sketchfab')">Sketchfab</li>
+                <li onclick="filterByPlatform('Kenney.nl')">Kenney.nl</li>
+                <li onclick="filterByPlatform('PolyHaven')">PolyHaven</li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title" id="pageTitle">搜索结果（找到 0 个资源）</h1>
+                <div class="view-controls">
+                    <button class="view-btn active" onclick="setView('grid')">网格视图</button>
+                    <button class="view-btn" onclick="setView('list')">列表视图</button>
+                </div>
+            </div>
+
+            <div class="resource-list" id="resourceList">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>正在加载资源...</div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button onclick="goToPage(1)">首页</button>
+                <button onclick="goToPage(currentPage - 1)" id="prevBtn">上一页</button>
+                <span id="pageInfo">第 1/1 页</span>
+                <button onclick="goToPage(currentPage + 1)" id="nextBtn">下一页</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModal">&times;</span>
+            <img id="modalImage" class="modal-image" src="" alt="资源预览">
+            <h2 id="modalTitle" class="modal-title"></h2>
+            <p id="modalLicense" class="modal-license"></p>
+            <p id="modalDescription" class="modal-description"></p>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let allResources = [];
+        let filteredResources = [];
+        let currentPage = 1;
+        const itemsPerPage = 12;
+        let currentView = 'grid';
+        let currentFilters = {
+            license: 'all',
+            category: 'all',
+            platform: 'all'
+        };
+
+        // DOM元素
+        const resourceList = document.getElementById('resourceList');
+        const modal = document.getElementById('previewModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalLicense = document.getElementById('modalLicense');
+        const modalDescription = document.getElementById('modalDescription');
+        const closeModal = document.getElementById('closeModal');
+        const pageTitle = document.getElementById('pageTitle');
+        const pagination = document.getElementById('pagination');
+
+        // API配置
+        const API_CONFIG = {
+            baseUrl: '/api', // 替换为您的API基础URL
+            endpoints: {
+                resources: '/resources',
+                search: '/search',
+                categories: '/categories'
+            }
+        };
+
+        // 从后端API获取资源数据
+        async function fetchResourcesFromAPI(params = {}) {
+            try {
+                showLoading();
+                
+                // 构建查询参数
+                const queryParams = new URLSearchParams({
+                    page: params.page || 1,
+                    limit: params.limit || 100,
+                    ...params.filters
+                });
+
+                // 发送API请求
+                const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.resources}?${queryParams}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 如果需要认证，添加Authorization头
+                        // 'Authorization': `Bearer ${getAuthToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 根据您的API响应格式调整
+                if (data.success && data.data) {
+                    return data.data.resources || data.data;
+                } else {
+                    throw new Error(data.message || '获取数据失败');
+                }
+            } catch (error) {
+                console.error('API请求失败:', error);
+                showError('加载资源失败: ' + error.message);
+                return [];
+            }
+        }
+
+        // 搜索资源
+        async function searchResources(query, filters = {}) {
+            try {
+                showLoading();
+                
+                const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.search}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        filters: filters,
+                        page: currentPage,
+                        limit: itemsPerPage
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    return data.data.resources || data.data;
+                } else {
+                    throw new Error(data.message || '搜索失败');
+                }
+            } catch (error) {
+                console.error('搜索失败:', error);
+                showError('搜索失败: ' + error.message);
+                return [];
+            }
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            resourceList.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>正在加载资源...</div>
+                </div>
+            `;
+        }
+
+        // 显示错误状态
+        function showError(message) {
+            resourceList.innerHTML = `
+                <div class="error">
+                    <div>❌ ${message}</div>
+                    <button onclick="loadResources()" style="margin-top: 16px; padding: 8px 16px; background: #00d4ff; color: white; border: none; border-radius: 8px; cursor: pointer;">重试</button>
+                </div>
+            `;
+        }
+
+        // 动态生成资源列表
+        function renderResourceList(resources = filteredResources) {
+            if (resources.length === 0) {
+                resourceList.innerHTML = `
+                    <div class="error">
+                        <div>📭 没有找到匹配的资源</div>
+                    </div>
+                `;
+                pagination.style.display = 'none';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageResources = resources.slice(startIndex, endIndex);
+
+            resourceList.innerHTML = pageResources.map(resource => `
+                <div class="resource-item" onclick="openModal(${JSON.stringify(resource).replace(/"/g, '&quot;')})">
+                    <img src="${resource.thumbnailUrl || resource.thumbnail_url || getDefaultThumbnail(resource)}" 
+                         alt="${resource.title}" 
+                         class="resource-thumbnail"
+                         onerror="this.src='${getDefaultThumbnail(resource)}'">
+                    <div class="resource-info">
+                        <h3 class="resource-title">${resource.title}</h3>
+                        <span class="resource-license ${getLicenseClass(resource.license)}">${resource.license}</span>
+                        <p class="resource-description">${resource.description || '暂无描述'}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // 更新分页信息
+            updatePagination(resources.length);
+        }
+
+        // 获取默认缩略图
+        function getDefaultThumbnail(resource) {
+            const category = resource.category || '其他';
+            if (category.includes('角色')) {
+                return 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop&crop=center';
+            } else if (category.includes('环境')) {
+                return 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&crop=center';
+            } else if (category.includes('UI')) {
+                return 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=300&h=200&fit=crop&crop=center';
+            }
+            return 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop&crop=center';
+        }
+
+        // 获取许可证样式类
+        function getLicenseClass(license) {
+            if (license && license.toLowerCase().includes('cc0')) {
+                return '';
+            } else if (license && license.toLowerCase().includes('cc-by')) {
+                return 'cc-by';
+            }
+            return '';
+        }
+
+        // 更新分页信息
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+            
+            document.getElementById('pageInfo').textContent = `第 ${currentPage}/${totalPages} 页`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+
+        // 打开模态框显示资源详情和大图
+        function openModal(resource) {
+            modalImage.src = resource.previewUrl || resource.detail_url || resource.thumbnailUrl || resource.thumbnail_url;
+            modalImage.alt = resource.title;
+            modalTitle.textContent = resource.title;
+            modalLicense.textContent = resource.license;
+            modalDescription.textContent = resource.description || '暂无详细描述';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModalHandler() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 筛选功能
+        function filterByLicense(license) {
+            currentFilters.license = license;
+            applyFilters();
+        }
+
+        function filterByCategory(category) {
+            currentFilters.category = category;
+            applyFilters();
+        }
+
+        function filterByPlatform(platform) {
+            currentFilters.platform = platform;
+            applyFilters();
+        }
+
+        // 应用筛选条件
+        function applyFilters() {
+            filteredResources = allResources.filter(resource => {
+                const licenseMatch = currentFilters.license === 'all' || 
+                    (currentFilters.license === 'cc0' && resource.license && resource.license.toLowerCase().includes('cc0')) ||
+                    (currentFilters.license === 'cc-by' && resource.license && resource.license.toLowerCase().includes('cc-by'));
+                
+                const categoryMatch = currentFilters.category === 'all' || 
+                    (resource.category && resource.category.includes(currentFilters.category));
+                
+                const platformMatch = currentFilters.platform === 'all' || 
+                    (resource.platform && resource.platform.includes(currentFilters.platform));
+                
+                return licenseMatch && categoryMatch && platformMatch;
+            });
+
+            currentPage = 1;
+            renderResourceList();
+            updatePageTitle();
+        }
+
+        // 更新页面标题
+        function updatePageTitle() {
+            pageTitle.textContent = `搜索结果（找到 ${filteredResources.length} 个资源）`;
+        }
+
+        // 设置视图模式
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 这里可以添加列表视图的实现
+            renderResourceList();
+        }
+
+        // 分页功能
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderResourceList();
+            }
+        }
+
+        // 加载资源数据
+        async function loadResources() {
+            try {
+                // 首先尝试从API获取数据
+                const apiResources = await fetchResourcesFromAPI();
+                
+                if (apiResources.length > 0) {
+                    allResources = apiResources;
+                } else {
+                    // 如果API失败，使用模拟数据
+                    console.warn('API数据获取失败，使用模拟数据');
+                    allResources = getMockData();
+                }
+                
+                filteredResources = [...allResources];
+                renderResourceList();
+                updatePageTitle();
+            } catch (error) {
+                console.error('加载资源失败:', error);
+                // 使用模拟数据作为降级方案
+                allResources = getMockData();
+                filteredResources = [...allResources];
+                renderResourceList();
+                updatePageTitle();
+            }
+        }
+
+        // 模拟数据（作为API失败时的降级方案）
+        function getMockData() {
+            return [
+                {
+                    id: 1,
+                    title: "奇幻战士角色",
+                    license: "CC0 1.0 公共领域",
+                    description: "一个高质量的奇幻战士角色模型，包含完整的骨骼绑定和动画。",
+                    thumbnailUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop&crop=center",
+                    previewUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center",
+                    category: "角色类",
+                    platform: "OpenGameArt"
+                },
+                {
+                    id: 2,
+                    title: "卡通男孩角色",
+                    license: "CC0",
+                    description: "一个可爱的低多边形卡通男孩角色。",
+                    thumbnailUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop&crop=center",
+                    previewUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop&crop=center",
+                    category: "角色类",
+                    platform: "Sketchfab"
+                },
+                {
+                    id: 3,
+                    title: "古代武士",
+                    license: "CC-BY 4.0",
+                    description: "带有东方风格的古代武士模型，包含盔甲和武器。",
+                    thumbnailUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop&crop=center",
+                    previewUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop&crop=center",
+                    category: "角色类",
+                    platform: "Kenney.nl"
+                },
+                {
+                    id: 4,
+                    title: "森林环境",
+                    license: "CC0",
+                    description: "茂密的森林环境场景，包含各种树木和植被。",
+                    thumbnailUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&crop=center",
+                    previewUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center",
+                    category: "环境类",
+                    platform: "PolyHaven"
+                },
+                {
+                    id: 5,
+                    title: "UI图标包",
+                    license: "CC0",
+                    description: "完整的游戏UI图标包，包含各种游戏界面元素。",
+                    thumbnailUrl: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=300&h=200&fit=crop&crop=center",
+                    previewUrl: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&h=600&fit=crop&crop=center",
+                    category: "UI元素",
+                    platform: "Kenney.nl"
+                }
+            ];
+        }
+
+        // 事件监听器
+        closeModal.addEventListener('click', closeModalHandler);
+        
+        // 点击模态框背景关闭
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModalHandler();
+            }
+        });
+
+        // 键盘事件
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.classList.contains('active')) {
+                closeModalHandler();
+            }
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadResources();
+        });
+    </script>
+</body>
+</html>

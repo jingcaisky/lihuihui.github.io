@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片URL测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-image {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>图片URL测试页面</h1>
+        <p>测试我们使用的图片URL是否能够正常加载</p>
+        
+        <div class="test-item">
+            <h3>测试图片 1 - 人物肖像</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片1" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status1"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 2 - 女性角色</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片2" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status2"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 3 - 男性角色</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片3" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status3"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 4 - 机器人</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片4" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status4"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 5 - 城堡</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片5" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status5"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 6 - 森林</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片6" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status6"></div>
+        </div>
+        
+        <div class="test-item">
+            <h3>测试图片 7 - UI设计</h3>
+            <img class="test-image" src="https://images.unsplash.com/photo-1558655146-d09347e92766?w=300&h=200&fit=crop&crop=center" 
+                 alt="测试图片7" 
+                 onload="showStatus(this, 'success', '加载成功')"
+                 onerror="showStatus(this, 'error', '加载失败')">
+            <div class="status" id="status7"></div>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(img, type, message) {
+            const statusId = 'status' + img.alt.replace('测试图片', '');
+            const statusElement = document.getElementById(statusId);
+            statusElement.textContent = message;
+            statusElement.className = 'status ' + type;
+        }
+        
+        // 页面加载完成后显示所有状态
+        window.addEventListener('load', function() {
+            console.log('页面加载完成，检查图片状态...');
+        });
+    </script>
+</body>
+</html>

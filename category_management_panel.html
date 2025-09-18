@@ -1,0 +1,719 @@
+<!-- 分类管理面板 -->
+<div id="category-panel" class="panel">
+    <div class="search-panel">
+        <div class="panel-title">📁 资源分类管理</div>
+        
+        <!-- 分类统计 -->
+        <div class="category-stats">
+            <div class="category-item" onclick="showCategory('characters')">
+                <div class="category-icon">👤</div>
+                <div class="category-info">
+                    <div class="category-name">角色类</div>
+                    <div class="category-count">128 个资源</div>
+                </div>
+            </div>
+            <div class="category-item" onclick="showCategory('weapons')">
+                <div class="category-icon">⚔️</div>
+                <div class="category-info">
+                    <div class="category-name">武器类</div>
+                    <div class="category-count">75 个资源</div>
+                </div>
+            </div>
+            <div class="category-item" onclick="showCategory('armor')">
+                <div class="category-icon">🛡️</div>
+                <div class="category-info">
+                    <div class="category-name">护甲类</div>
+                    <div class="category-count">42 个资源</div>
+                </div>
+            </div>
+            <div class="category-item" onclick="showCategory('environments')">
+                <div class="category-icon">🏰</div>
+                <div class="category-info">
+                    <div class="category-name">环境类</div>
+                    <div class="category-count">156 个资源</div>
+                </div>
+            </div>
+            <div class="category-item" onclick="showCategory('ui_elements')">
+                <div class="category-icon">🎨</div>
+                <div class="category-info">
+                    <div class="category-name">UI元素</div>
+                    <div class="category-count">63 个资源</div>
+                </div>
+            </div>
+            <div class="category-item" onclick="showCategory('effects')">
+                <div class="category-icon">✨</div>
+                <div class="category-info">
+                    <div class="category-name">特效类</div>
+                    <div class="category-count">37 个资源</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分类操作按钮 -->
+        <div class="category-controls">
+            <button class="control-button primary" onclick="showManualClassification()">📝 手动分类</button>
+            <button class="control-button primary" onclick="showBatchRename()">🏷️ 批量重命名</button>
+            <button class="control-button secondary" onclick="rescanCategories()">🔄 重新扫描</button>
+            <button class="control-button secondary" onclick="exportStatistics()">📊 导出统计</button>
+        </div>
+
+        <!-- 当前分类内容 -->
+        <div class="category-content">
+            <div class="category-header">
+                <h3 id="current-category-name">角色类</h3>
+                <div class="category-actions">
+                    <button class="action-button" onclick="selectAllInCategory()">全选</button>
+                    <button class="action-button" onclick="moveSelectedToCategory()">移动到分类</button>
+                    <button class="action-button" onclick="deleteSelected()">删除选中</button>
+                </div>
+            </div>
+            
+            <div class="resource-grid" id="category-resources">
+                <!-- 角色类资源 -->
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">👤</div>
+                    <div class="resource-name">战士.fbx</div>
+                    <div class="resource-meta">15.2MB | FBX</div>
+                </div>
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">🧙</div>
+                    <div class="resource-name">法师.fbx</div>
+                    <div class="resource-meta">12.8MB | FBX</div>
+                </div>
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">🗡️</div>
+                    <div class="resource-name">盗贼.fbx</div>
+                    <div class="resource-meta">11.5MB | FBX</div>
+                </div>
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">🏹</div>
+                    <div class="resource-name">弓箭手.fbx</div>
+                    <div class="resource-meta">13.2MB | FBX</div>
+                </div>
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">⚔️</div>
+                    <div class="resource-name">骑士.fbx</div>
+                    <div class="resource-meta">16.8MB | FBX</div>
+                </div>
+                <div class="resource-item" data-category="characters">
+                    <input type="checkbox" class="resource-checkbox">
+                    <div class="resource-preview">⛑️</div>
+                    <div class="resource-name">牧师.fbx</div>
+                    <div class="resource-meta">14.1MB | FBX</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 手动分类对话框 -->
+<div id="manual-classification-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📝 手动分类</h3>
+            <button class="close-button" onclick="closeModal('manual-classification-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="classification-form">
+                <div class="form-group">
+                    <label>选择资源:</label>
+                    <div class="selected-resources" id="selected-resources-list">
+                        <!-- 选中的资源将在这里显示 -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>目标分类:</label>
+                    <select id="target-category" class="form-select">
+                        <option value="characters">角色类</option>
+                        <option value="weapons">武器类</option>
+                        <option value="armor">护甲类</option>
+                        <option value="environments">环境类</option>
+                        <option value="ui_elements">UI元素</option>
+                        <option value="effects">特效类</option>
+                        <option value="misc">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>操作:</label>
+                    <div class="operation-options">
+                        <label><input type="radio" name="operation" value="move" checked> 移动到分类</label>
+                        <label><input type="radio" name="operation" value="copy"> 复制到分类</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="control-button primary" onclick="applyClassification()">应用分类</button>
+            <button class="control-button secondary" onclick="closeModal('manual-classification-modal')">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 批量重命名对话框 -->
+<div id="batch-rename-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🏷️ 批量重命名</h3>
+            <button class="close-button" onclick="closeModal('batch-rename-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="rename-form">
+                <div class="form-group">
+                    <label>重命名规则:</label>
+                    <select id="rename-rule" class="form-select">
+                        <option value="prefix">添加前缀</option>
+                        <option value="suffix">添加后缀</option>
+                        <option value="replace">替换文本</option>
+                        <option value="number">添加序号</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>文本内容:</label>
+                    <input type="text" id="rename-text" class="form-input" placeholder="输入要添加或替换的文本">
+                </div>
+                <div class="form-group">
+                    <label>预览:</label>
+                    <div class="rename-preview" id="rename-preview">
+                        <!-- 重命名预览将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="control-button primary" onclick="applyRename()">应用重命名</button>
+            <button class="control-button secondary" onclick="closeModal('batch-rename-modal')">取消</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 分类管理面板样式 */
+.category-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(44, 62, 80, 0.5);
+    border: 1px solid #7F8C8D;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-item:hover {
+    border-color: #E67E22;
+    background: rgba(230, 126, 34, 0.1);
+}
+
+.category-item.active {
+    border-color: #E67E22;
+    background: rgba(230, 126, 34, 0.2);
+}
+
+.category-icon {
+    font-size: 32px;
+    width: 50px;
+    text-align: center;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.category-count {
+    font-size: 12px;
+    color: #BDC3C7;
+}
+
+.category-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.category-content {
+    background: rgba(44, 62, 80, 0.3);
+    border-radius: 6px;
+    padding: 20px;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #7F8C8D;
+}
+
+.category-header h3 {
+    color: #E67E22;
+    font-size: 20px;
+}
+
+.category-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.resource-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: rgba(52, 73, 94, 0.5);
+    border: 1px solid #7F8C8D;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.resource-item:hover {
+    border-color: #E67E22;
+    background: rgba(230, 126, 34, 0.1);
+}
+
+.resource-checkbox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 18px;
+    height: 18px;
+}
+
+.resource-preview {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.resource-name {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+    word-break: break-all;
+}
+
+.resource-meta {
+    font-size: 11px;
+    color: #BDC3C7;
+    text-align: center;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #34495E;
+    border: 1px solid #E67E22;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #7F8C8D;
+}
+
+.modal-header h3 {
+    color: #E67E22;
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: #ECF0F1;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-button:hover {
+    color: #E67E22;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #7F8C8D;
+}
+
+.classification-form, .rename-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.selected-resources {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #7F8C8D;
+    border-radius: 4px;
+    padding: 10px;
+    background: rgba(44, 62, 80, 0.3);
+}
+
+.selected-resource {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #7F8C8D;
+}
+
+.selected-resource:last-child {
+    border-bottom: none;
+}
+
+.operation-options {
+    display: flex;
+    gap: 20px;
+}
+
+.operation-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.rename-preview {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #7F8C8D;
+    border-radius: 4px;
+    padding: 10px;
+    background: rgba(44, 62, 80, 0.3);
+}
+
+.rename-preview-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #7F8C8D;
+    font-size: 12px;
+}
+
+.rename-preview-item:last-child {
+    border-bottom: none;
+}
+
+.rename-preview-item .old-name {
+    color: #E74C3C;
+    text-decoration: line-through;
+}
+
+.rename-preview-item .new-name {
+    color: #2ECC71;
+    font-weight: bold;
+}
+</style>
+
+<script>
+// 分类管理功能
+let currentCategory = 'characters';
+
+function showCategory(category) {
+    currentCategory = category;
+    
+    // 更新分类项状态
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.closest('.category-item').classList.add('active');
+    
+    // 更新分类名称
+    const categoryNames = {
+        'characters': '角色类',
+        'weapons': '武器类',
+        'armor': '护甲类',
+        'environments': '环境类',
+        'ui_elements': 'UI元素',
+        'effects': '特效类'
+    };
+    
+    document.getElementById('current-category-name').textContent = categoryNames[category];
+    
+    // 显示对应分类的资源
+    showCategoryResources(category);
+}
+
+function showCategoryResources(category) {
+    const resourceGrid = document.getElementById('category-resources');
+    const resources = getResourcesByCategory(category);
+    
+    resourceGrid.innerHTML = resources.map(resource => `
+        <div class="resource-item" data-category="${category}">
+            <input type="checkbox" class="resource-checkbox">
+            <div class="resource-preview">${resource.icon}</div>
+            <div class="resource-name">${resource.name}</div>
+            <div class="resource-meta">${resource.size} | ${resource.format}</div>
+        </div>
+    `).join('');
+}
+
+function getResourcesByCategory(category) {
+    const resources = {
+        'characters': [
+            { icon: '👤', name: '战士.fbx', size: '15.2MB', format: 'FBX' },
+            { icon: '🧙', name: '法师.fbx', size: '12.8MB', format: 'FBX' },
+            { icon: '🗡️', name: '盗贼.fbx', size: '11.5MB', format: 'FBX' },
+            { icon: '🏹', name: '弓箭手.fbx', size: '13.2MB', format: 'FBX' },
+            { icon: '⚔️', name: '骑士.fbx', size: '16.8MB', format: 'FBX' },
+            { icon: '⛑️', name: '牧师.fbx', size: '14.1MB', format: 'FBX' }
+        ],
+        'weapons': [
+            { icon: '⚔️', name: '长剑.blend', size: '4.7MB', format: 'Blend' },
+            { icon: '🏹', name: '长弓.blend', size: '3.2MB', format: 'Blend' },
+            { icon: '🪄', name: '法杖.blend', size: '5.1MB', format: 'Blend' },
+            { icon: '🗡️', name: '匕首.blend', size: '2.8MB', format: 'Blend' }
+        ],
+        'armor': [
+            { icon: '🛡️', name: '盾牌.blend', size: '6.3MB', format: 'Blend' },
+            { icon: '⛑️', name: '头盔.blend', size: '4.2MB', format: 'Blend' },
+            { icon: '🦺', name: '胸甲.blend', size: '8.7MB', format: 'Blend' }
+        ],
+        'environments': [
+            { icon: '🏰', name: '城堡.obj', size: '32.1MB', format: 'OBJ' },
+            { icon: '🌲', name: '森林.blend', size: '28.5MB', format: 'Blend' },
+            { icon: '🏔️', name: '山脉.obj', size: '45.2MB', format: 'OBJ' }
+        ],
+        'ui_elements': [
+            { icon: '🎨', name: '图标包.png', size: '2.3MB', format: 'PNG' },
+            { icon: '🔘', name: '按钮.png', size: '1.8MB', format: 'PNG' },
+            { icon: '📊', name: '界面.png', size: '3.1MB', format: 'PNG' }
+        ],
+        'effects': [
+            { icon: '✨', name: '魔法特效.blend', size: '12.5MB', format: 'Blend' },
+            { icon: '💥', name: '爆炸效果.blend', size: '8.9MB', format: 'Blend' },
+            { icon: '🌟', name: '粒子系统.blend', size: '15.7MB', format: 'Blend' }
+        ]
+    };
+    
+    return resources[category] || [];
+}
+
+function selectAllInCategory() {
+    const checkboxes = document.querySelectorAll('.resource-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function moveSelectedToCategory() {
+    const selectedResources = getSelectedResources();
+    if (selectedResources.length === 0) {
+        alert('请先选择要移动的资源');
+        return;
+    }
+    
+    showModal('manual-classification-modal');
+    updateSelectedResourcesList(selectedResources);
+}
+
+function deleteSelected() {
+    const selectedResources = getSelectedResources();
+    if (selectedResources.length === 0) {
+        alert('请先选择要删除的资源');
+        return;
+    }
+    
+    if (confirm(`确定要删除 ${selectedResources.length} 个选中的资源吗？`)) {
+        selectedResources.forEach(resource => {
+            resource.closest('.resource-item').remove();
+        });
+    }
+}
+
+function getSelectedResources() {
+    return Array.from(document.querySelectorAll('.resource-checkbox:checked'));
+}
+
+function updateSelectedResourcesList(selectedResources) {
+    const list = document.getElementById('selected-resources-list');
+    list.innerHTML = selectedResources.map(checkbox => {
+        const resourceItem = checkbox.closest('.resource-item');
+        const name = resourceItem.querySelector('.resource-name').textContent;
+        return `
+            <div class="selected-resource">
+                <span>${name}</span>
+                <button class="action-button" onclick="removeFromSelection(this)">移除</button>
+            </div>
+        `;
+    }).join('');
+}
+
+function removeFromSelection(button) {
+    button.closest('.selected-resource').remove();
+}
+
+function showManualClassification() {
+    const selectedResources = getSelectedResources();
+    if (selectedResources.length === 0) {
+        alert('请先选择要分类的资源');
+        return;
+    }
+    
+    showModal('manual-classification-modal');
+    updateSelectedResourcesList(selectedResources);
+}
+
+function showBatchRename() {
+    const selectedResources = getSelectedResources();
+    if (selectedResources.length === 0) {
+        alert('请先选择要重命名的资源');
+        return;
+    }
+    
+    showModal('batch-rename-modal');
+    updateRenamePreview();
+}
+
+function rescanCategories() {
+    if (confirm('确定要重新扫描所有分类吗？这将更新资源统计信息。')) {
+        alert('正在重新扫描分类...');
+        // 这里可以添加实际的重新扫描逻辑
+    }
+}
+
+function exportStatistics() {
+    alert('正在导出分类统计信息...');
+    // 这里可以添加实际的导出逻辑
+}
+
+function applyClassification() {
+    const targetCategory = document.getElementById('target-category').value;
+    const operation = document.querySelector('input[name="operation"]:checked').value;
+    
+    alert(`正在${operation === 'move' ? '移动' : '复制'}资源到${targetCategory}分类...`);
+    closeModal('manual-classification-modal');
+}
+
+function applyRename() {
+    const rule = document.getElementById('rename-rule').value;
+    const text = document.getElementById('rename-text').value;
+    
+    if (!text.trim()) {
+        alert('请输入重命名文本');
+        return;
+    }
+    
+    alert(`正在应用重命名规则: ${rule} - ${text}`);
+    closeModal('batch-rename-modal');
+}
+
+function updateRenamePreview() {
+    const rule = document.getElementById('rename-rule').value;
+    const text = document.getElementById('rename-text').value;
+    const preview = document.getElementById('rename-preview');
+    
+    const selectedResources = getSelectedResources();
+    preview.innerHTML = selectedResources.map(checkbox => {
+        const resourceItem = checkbox.closest('.resource-item');
+        const name = resourceItem.querySelector('.resource-name').textContent;
+        let newName = name;
+        
+        switch (rule) {
+            case 'prefix':
+                newName = text + name;
+                break;
+            case 'suffix':
+                const dotIndex = name.lastIndexOf('.');
+                if (dotIndex > 0) {
+                    newName = name.substring(0, dotIndex) + text + name.substring(dotIndex);
+                } else {
+                    newName = name + text;
+                }
+                break;
+            case 'replace':
+                newName = name.replace(/old/g, text);
+                break;
+            case 'number':
+                newName = name.replace(/(\d+)/, text);
+                break;
+        }
+        
+        return `
+            <div class="rename-preview-item">
+                <span class="old-name">${name}</span> → 
+                <span class="new-name">${newName}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function showModal(modalId) {
+    document.getElementById(modalId).classList.add('show');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+}
+
+// 监听重命名规则变化
+document.addEventListener('DOMContentLoaded', function() {
+    const renameRule = document.getElementById('rename-rule');
+    const renameText = document.getElementById('rename-text');
+    
+    if (renameRule && renameText) {
+        renameRule.addEventListener('change', updateRenamePreview);
+        renameText.addEventListener('input', updateRenamePreview);
+    }
+});
+</script>

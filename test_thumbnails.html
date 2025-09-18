@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>缩略图测试页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #00d4ff;
+        }
+        
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .resource-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+        
+        .resource-thumbnail {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        
+        .resource-thumbnail.cc0 {
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+        
+        .resource-thumbnail.ccby {
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .resource-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .thumbnail-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        
+        .thumbnail-icon {
+            font-size: 32px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+        
+        .thumbnail-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            z-index: 3;
+        }
+        
+        .model-type-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+        
+        .model-type-badge.type-3d {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+        }
+        
+        .model-type-badge.type-2d {
+            background: rgba(254, 202, 87, 0.9);
+            color: white;
+        }
+        
+        .resource-info {
+            padding: 16px;
+        }
+        
+        .resource-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        
+        .resource-license {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .license-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .license-tag.cc0 {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        .license-tag.ccby {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        
+        .resource-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .meta-tag {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(232, 232, 232, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .test-description {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">缩略图显示测试</h1>
+        
+        <div class="test-description">
+            <h3>测试说明：</h3>
+            <p>• 第一行：使用实际图片URL的资源（应该显示真实图片）</p>
+            <p>• 第二行：使用emoji图标的资源（应该显示emoji图标）</p>
+            <p>• 第三行：使用无效URL的资源（应该回退到emoji图标）</p>
+        </div>
+        
+        <div class="resource-grid" id="test-grid">
+            <!-- 测试数据将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 测试数据
+        const testResources = [
+            {
+                id: 1,
+                title: '实际图片 - 奇幻战士',
+                licenseType: 'cc0',
+                modelType: '3D',
+                thumbnail: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop&crop=center',
+                size: '15.2MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC0'
+            },
+            {
+                id: 2,
+                title: '实际图片 - 现代女性',
+                licenseType: 'ccby',
+                modelType: '3D',
+                thumbnail: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=200&fit=crop&crop=center',
+                size: '18.5MB',
+                format: 'FBX',
+                platform: 'Sketchfab',
+                license: 'CC-BY'
+            },
+            {
+                id: 3,
+                title: 'Emoji图标 - 卡通男孩',
+                licenseType: 'cc0',
+                modelType: '3D',
+                thumbnail: '👦',
+                size: '12.3MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC0'
+            },
+            {
+                id: 4,
+                title: 'Emoji图标 - 魔法法杖',
+                licenseType: 'ccby',
+                modelType: '3D',
+                thumbnail: '🪄',
+                size: '8.9MB',
+                format: 'FBX',
+                platform: 'OpenGameArt',
+                license: 'CC-BY'
+            },
+            {
+                id: 5,
+                title: '无效URL - 应该回退',
+                licenseType: 'cc0',
+                modelType: '3D',
+                thumbnail: 'https://invalid-url-that-should-fail.com/image.jpg',
+                size: '10.0MB',
+                format: 'FBX',
+                platform: 'Test',
+                license: 'CC0'
+            },
+            {
+                id: 6,
+                title: '无效URL - 应该回退',
+                licenseType: 'ccby',
+                modelType: '2D',
+                thumbnail: 'https://another-invalid-url.com/image.png',
+                size: '5.0MB',
+                format: 'PNG',
+                platform: 'Test',
+                license: 'CC-BY'
+            }
+        ];
+
+        function getThumbnailIcon(resource) {
+            // 根据资源类型返回默认图标
+            if (resource.category === '角色类') return '👤';
+            if (resource.category === '武器类') return '⚔️';
+            if (resource.category === '环境类') return '🏰';
+            if (resource.category === 'UI元素') return '🎨';
+            return '📦';
+        }
+
+        function displayTestResources() {
+            const testGrid = document.getElementById('test-grid');
+            
+            testGrid.innerHTML = testResources.map(resource => `
+                <div class="resource-card">
+                    <div class="resource-thumbnail ${resource.licenseType}" data-model-type="${resource.modelType}">
+                        ${resource.thumbnail && resource.thumbnail.startsWith('http') ? 
+                            `<img src="${resource.thumbnail}" alt="${resource.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                             <div class="thumbnail-fallback" style="display:none;">
+                                 <div class="thumbnail-icon">${getThumbnailIcon(resource)}</div>
+                             </div>` : 
+                            `<div class="thumbnail-fallback">
+                                 <div class="thumbnail-icon">${getThumbnailIcon(resource)}</div>
+                             </div>`}
+                        <div class="thumbnail-badge">
+                            <span class="model-type-badge type-${resource.modelType.toLowerCase()}">${resource.modelType}</span>
+                        </div>
+                    </div>
+                    <div class="resource-info">
+                        <div class="resource-title">${resource.title}</div>
+                        <div class="resource-license">
+                            <span class="license-tag ${resource.licenseType}">${resource.license}</span>
+                        </div>
+                        <div class="resource-meta">
+                            <span class="meta-tag">${resource.size}</span>
+                            <span class="meta-tag">${resource.format}</span>
+                            <span class="meta-tag">${resource.platform}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 页面加载完成后显示测试资源
+        document.addEventListener('DOMContentLoaded', displayTestResources);
+    </script>
+</body>
+</html>

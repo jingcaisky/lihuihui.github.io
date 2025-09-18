@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强版缩略图测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-thumbnail {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .test-thumbnail-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-size: 32px;
+        }
+        
+        .test-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+        
+        .test-category {
+            font-size: 12px;
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00d4ff;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 RPG资源管理器 - 增强版缩略图测试</h1>
+        
+        <div class="test-section">
+            <h2>角色类资源测试</h2>
+            <div class="test-grid" id="characterTest">
+                <div class="loading">正在加载测试数据...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>环境类资源测试</h2>
+            <div class="test-grid" id="environmentTest">
+                <div class="loading">正在加载测试数据...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>武器类资源测试</h2>
+            <div class="test-grid" id="weaponTest">
+                <div class="loading">正在加载测试数据...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>UI元素测试</h2>
+            <div class="test-grid" id="uiTest">
+                <div class="loading">正在加载测试数据...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 复制主应用中的函数
+        function getThumbnailImageUrl(resource) {
+            const category = resource.category || '其他';
+            const title = resource.title || '';
+            
+            // 角色类图片 - 使用游戏角色相关的图片
+            if (category.includes('角色') || category.includes('Character')) {
+                if (title.includes('女性') || title.includes('女孩') || title.includes('女')) {
+                    return 'https://picsum.photos/300/200?random=101'; // 女性角色
+                } else if (title.includes('男孩') || title.includes('男性') || title.includes('男')) {
+                    return 'https://picsum.photos/300/200?random=102'; // 男性角色
+                } else if (title.includes('机器人') || title.includes('科幻') || title.includes('机械')) {
+                    return 'https://picsum.photos/300/200?random=103'; // 机器人/科幻角色
+                } else if (title.includes('战士') || title.includes('Warrior')) {
+                    return 'https://picsum.photos/300/200?random=104'; // 战士角色
+                } else if (title.includes('法师') || title.includes('Mage') || title.includes('术士')) {
+                    return 'https://picsum.photos/300/200?random=105'; // 法师角色
+                } else if (title.includes('盗贼') || title.includes('Rogue') || title.includes('刺客')) {
+                    return 'https://picsum.photos/300/200?random=106'; // 盗贼角色
+                } else if (title.includes('弓箭手') || title.includes('Archer')) {
+                    return 'https://picsum.photos/300/200?random=107'; // 弓箭手角色
+                } else if (title.includes('骑士') || title.includes('Knight')) {
+                    return 'https://picsum.photos/300/200?random=108'; // 骑士角色
+                } else if (title.includes('牧师') || title.includes('Priest') || title.includes('治疗')) {
+                    return 'https://picsum.photos/300/200?random=109'; // 牧师角色
+                } else if (title.includes('野蛮人') || title.includes('Barbarian')) {
+                    return 'https://picsum.photos/300/200?random=110'; // 野蛮人角色
+                } else if (title.includes('游侠') || title.includes('Ranger')) {
+                    return 'https://picsum.photos/300/200?random=111'; // 游侠角色
+                } else if (title.includes('武僧') || title.includes('Monk')) {
+                    return 'https://picsum.photos/300/200?random=112'; // 武僧角色
+                } else {
+                    return 'https://picsum.photos/300/200?random=100'; // 默认角色
+                }
+            }
+            // 环境类图片 - 使用游戏环境相关的图片
+            else if (category.includes('环境') || category.includes('Environment')) {
+                if (title.includes('森林') || title.includes('自然') || title.includes('树木')) {
+                    return 'https://picsum.photos/300/200?random=201'; // 森林环境
+                } else if (title.includes('城堡') || title.includes('建筑') || title.includes('城市')) {
+                    return 'https://picsum.photos/300/200?random=202'; // 城堡/建筑环境
+                } else if (title.includes('洞穴') || title.includes('地下') || title.includes('地牢')) {
+                    return 'https://picsum.photos/300/200?random=203'; // 洞穴环境
+                } else if (title.includes('沙漠') || title.includes('荒原')) {
+                    return 'https://picsum.photos/300/200?random=204'; // 沙漠环境
+                } else if (title.includes('雪山') || title.includes('冰原')) {
+                    return 'https://picsum.photos/300/200?random=205'; // 雪山环境
+                } else {
+                    return 'https://picsum.photos/300/200?random=200'; // 默认环境
+                }
+            }
+            // UI元素图片 - 使用游戏UI相关的图片
+            else if (category.includes('UI') || category.includes('UI元素')) {
+                return 'https://picsum.photos/300/200?random=301'; // UI元素
+            }
+            // 武器类图片 - 使用游戏武器相关的图片
+            else if (category.includes('武器') || category.includes('Weapon')) {
+                if (title.includes('剑') || title.includes('Sword')) {
+                    return 'https://picsum.photos/300/200?random=401'; // 剑类武器
+                } else if (title.includes('弓') || title.includes('Bow') || title.includes('箭')) {
+                    return 'https://picsum.photos/300/200?random=402'; // 弓箭类武器
+                } else if (title.includes('法杖') || title.includes('Staff') || title.includes('魔杖')) {
+                    return 'https://picsum.photos/300/200?random=403'; // 法杖类武器
+                } else if (title.includes('盾') || title.includes('Shield')) {
+                    return 'https://picsum.photos/300/200?random=404'; // 盾牌
+                } else if (title.includes('斧') || title.includes('Axe')) {
+                    return 'https://picsum.photos/300/200?random=405'; // 斧类武器
+                } else if (title.includes('锤') || title.includes('Hammer')) {
+                    return 'https://picsum.photos/300/200?random=406'; // 锤类武器
+                } else {
+                    return 'https://picsum.photos/300/200?random=400'; // 默认武器
+                }
+            }
+            // 特效类图片
+            else if (category.includes('特效') || category.includes('Effect') || category.includes('粒子')) {
+                return 'https://picsum.photos/300/200?random=501'; // 特效
+            }
+            // 音效类图片
+            else if (category.includes('音效') || category.includes('Audio') || category.includes('音乐')) {
+                return 'https://picsum.photos/300/200?random=601'; // 音效
+            }
+            // 默认图片
+            else {
+                return 'https://picsum.photos/300/200?random=999'; // 默认图片
+            }
+        }
+
+        function getThumbnailIcon(resource) {
+            const category = resource.category || '其他';
+            const modelType = resource.modelType || '3D';
+            
+            if (category.includes('角色') || category.includes('Character')) {
+                return modelType === '2D' ? '👤' : '👤';
+            } else if (category.includes('环境') || category.includes('Environment')) {
+                return modelType === '2D' ? '🌍' : '🏞️';
+            } else if (category.includes('武器') || category.includes('Weapon')) {
+                return modelType === '2D' ? '⚔️' : '🗡️';
+            } else if (category.includes('UI') || category.includes('UI元素')) {
+                return modelType === '2D' ? '🖼️' : '🎲';
+            }
+        }
+
+        // 测试数据
+        const testData = {
+            characters: [
+                { title: '奇幻战士角色', category: '角色类', modelType: '3D' },
+                { title: '卡通男孩角色', category: '角色类', modelType: '3D' },
+                { title: '古代武士', category: '角色类', modelType: '3D' },
+                { title: '现代法师角色', category: '角色类', modelType: '3D' },
+                { title: '科幻盗贼角色', category: '角色类', modelType: '3D' },
+                { title: '卡通弓箭手角色', category: '角色类', modelType: '3D' },
+                { title: '写实骑士角色', category: '角色类', modelType: '3D' },
+                { title: '像素牧师角色', category: '角色类', modelType: '2D' }
+            ],
+            environments: [
+                { title: '森林环境', category: '环境类', modelType: '3D' },
+                { title: '城堡建筑', category: '环境类', modelType: '3D' },
+                { title: '地下洞穴', category: '环境类', modelType: '3D' },
+                { title: '沙漠荒原', category: '环境类', modelType: '3D' },
+                { title: '雪山冰原', category: '环境类', modelType: '3D' }
+            ],
+            weapons: [
+                { title: '魔法剑', category: '武器类', modelType: '3D' },
+                { title: '精灵弓', category: '武器类', modelType: '3D' },
+                { title: '法师法杖', category: '武器类', modelType: '3D' },
+                { title: '骑士盾牌', category: '武器类', modelType: '3D' },
+                { title: '战斧', category: '武器类', modelType: '3D' }
+            ],
+            ui: [
+                { title: '游戏UI图标包', category: 'UI元素', modelType: '2D' },
+                { title: '按钮界面', category: 'UI元素', modelType: '2D' },
+                { title: '菜单界面', category: 'UI元素', modelType: '2D' }
+            ]
+        };
+
+        // 渲染测试项目
+        function renderTestItems(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map(item => {
+                const imageUrl = getThumbnailImageUrl(item);
+                return `
+                    <div class="test-item">
+                        <div class="test-thumbnail">
+                            <img src="${imageUrl}" alt="${item.title}" 
+                                 onload="console.log('测试图片加载成功:', '${item.title}')" 
+                                 onerror="console.log('测试图片加载失败:', '${item.title}', '${imageUrl}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                            <div class="test-thumbnail-fallback" style="display:none;">
+                                ${getThumbnailIcon(item)}
+                            </div>
+                        </div>
+                        <div class="test-title">${item.title}</div>
+                        <div class="test-category">${item.category}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 初始化测试
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('开始测试增强版缩略图功能...');
+            
+            renderTestItems('characterTest', testData.characters);
+            renderTestItems('environmentTest', testData.environments);
+            renderTestItems('weaponTest', testData.weapons);
+            renderTestItems('uiTest', testData.ui);
+            
+            console.log('测试数据渲染完成！');
+        });
+    </script>
+</body>
+</html>
