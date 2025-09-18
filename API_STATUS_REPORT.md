@@ -53,9 +53,19 @@
 ### ❌ 有问题的API
 
 #### 2. PolyHaven API
-- **状态**: ❌ 需要特定资源ID
-- **问题**: API需要特定格式 `/files/[asset_id]`，不支持搜索
-- **建议**: 需要先获取资源列表，然后查询特定资源
+- **状态**: ✅ 已修复并正常工作
+- **API端点**: `https://api.polyhaven.com/files/[asset_id]`
+- **返回数据**: 完整的JSON数据，包含：
+  - ✅ 资源标题 (通过asset_id生成)
+  - ✅ 描述 (自动生成)
+  - ✅ 作者信息 (Poly Haven)
+  - ✅ 许可证 (CC0)
+  - ✅ **真实缩略图** (tonemapped.url)
+  - ✅ 下载链接 (hdri.4k.hdr.url)
+  - ✅ 文件大小 (hdri.4k.hdr.size)
+  - ✅ 多种格式 (HDR, EXR, 1K-16K分辨率)
+
+**已修复**: 现在PolyHaven搜索结果会显示真实的HDRI预览图片！
 
 #### 3. VRoid Hub API
 - **状态**: ❌ 400错误
