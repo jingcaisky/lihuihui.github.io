@@ -6,6 +6,9 @@
   "scripts": {
     "start": "electron .",
     "start:normal": "start_normal.bat",
+    "start:silent": "start_silent.bat",
+    "start:hidden": "start_hidden.vbs",
+    "start:ps": "powershell -ExecutionPolicy Bypass -File start_normal.ps1",
     "dev": "electron . --dev",
     "build": "electron-builder",
     "build-win": "electron-builder --win",
