@@ -17,7 +17,7 @@ if not exist "node_modules" (
 )
 
 REM 静默启动Electron（不显示控制台窗口）
-start "" /min electron . >nul 2>&1
+start "" /min cmd /c "npx electron ." >nul 2>&1
 
 REM 立即退出批处理，不显示任何窗口
 exit /b 0

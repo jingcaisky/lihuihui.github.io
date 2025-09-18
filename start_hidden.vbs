@@ -18,8 +18,10 @@ If Not fso.FolderExists("node_modules") Then
     WshShell.Run "npm install", 0, True
 End If
 
-' 静默启动Electron
-WshShell.Run "electron .", 0, False
+' 静默启动Electron - 使用完整路径
+Dim currentDir
+currentDir = CreateObject("Scripting.FileSystemObject").GetParentFolderName(WScript.ScriptFullName)
+WshShell.Run "cmd /c cd /d """ & currentDir & """ && npx electron .", 0, False
 
 ' 退出VBS脚本
 WScript.Quit

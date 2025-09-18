@@ -43,7 +43,7 @@ echo 正在启动RPG资源管理器...
 echo 请稍候，应用即将打开...
 
 REM 使用start命令启动，避免显示控制台
-start "" /min electron .
+start "" /min cmd /c "npx electron ."
 
 REM 等待2秒后关闭启动器窗口
 timeout /t 2 >nul
