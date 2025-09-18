@@ -3713,7 +3713,7 @@ https://motrix.app/ 下载并安装
                             rating: item.likeCount ? Math.min(5, Math.max(1, item.likeCount / 100)) : 3.5,
                             downloads: item.viewCount || 0,
                             tags: item.tags ? item.tags.map(tag => tag.slug) : [],
-                            thumbnail: item.thumbnails && item.thumbnails.images ? item.thumbnails.images[0].url : '🎨',
+                            thumbnail: item.thumbnails && item.thumbnails.images ? item.thumbnails.images[0].url : getRelevantThumbnailUrl('角色类', item.name),
                             description: item.description || '来自Sketchfab的3D模型',
                             author: item.user.displayName,
                             license: license,
@@ -3747,8 +3747,8 @@ https://motrix.app/ 下载并安装
             const results = [];
             
             try {
-                // PolyHaven API
-                const searchUrl = `https://api.polyhaven.com/search?q=${encodeURIComponent(keyword)}`;
+                // PolyHaven API - 使用正确的端点
+                const searchUrl = `https://api.polyhaven.com/files`;
                 
                 console.log('PolyHaven搜索URL:', searchUrl);
                 
